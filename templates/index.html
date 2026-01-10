@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>News Categorization</title>
+
+    <style>
+        /* ===== HEADER ===== */
+        .header {
+            width: 100%;
+            background: rgb(240, 230, 248);
+            padding: 10px 40px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content:space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+
+        .header-left {
+            font-size: 30px;
+            font-weight: bold;
+            color: #4b2c5e;
+        }
+
+        .header-left span {
+            font-size: 14px;
+            display: block;
+            color: #777;
+        }
+
+        .header-right a {
+            cursor: pointer;
+            color: #4b2c5e;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .header-right a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== PAGE ===== */
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0d2ff;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            width: 80%;
+            max-width: 1200px;
+            margin: 150px auto;
+        }
+
+        .left {
+            width: 40%;
+        }
+
+        .right {
+            width: 60%;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 15px;
+            font-size: 16px;
+        }
+
+        /* ===== BUTTONS ===== */
+        button {
+            background: #6a3ea1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #56308a;
+        }
+
+        .clear-btn {
+            background: #999;
+        }
+
+        .clear-btn:hover {
+            background: #777;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .real {
+            color: green;
+        }
+
+        .fake {
+            color: red;
+        }
+
+        /* ===== CHATBOT ===== */
+        .chat-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: #6a3ea1;
+            color: white;
+            font-size: 22px;
+            border: none;
+            cursor: pointer;
+            z-index: 2000;
+        }
+
+        .chatbox {
+            position: fixed;
+            bottom: 90px;
+            right: 25px;
+            width: 330px;
+            height: 420px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+            display: none;
+            /* hidden by default; use .open to show */
+            z-index: 2000;
+            overflow: hidden;
+        }
+
+        /* Show chatbox with the proper flex layout when open */
+        .chatbox.open {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chatbox-header {
+            background: #4b2c5e;
+            color: white;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chatbox-messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            background: #f7f7f9;
+            min-height: 0;
+            /* allows proper scrolling inside flex container */
+        }
+
+        .msg {
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 85%;
+            font-size: 14px;
+        }
+
+        .user {
+            background: #6a3ea1;
+            color: white;
+            margin-left: auto;
+        }
+
+        .bot {
+            background: white;
+            border: 1px solid #ddd;
+        }
+
+        .chatbox-input {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .chatbox-input input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .quick-questions button {
+            background: #eee;
+            color: #333;
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+
+        .quick-questions button:hover {
+            background: #6a3ea1;
+            color: white;
+        }
+
+        /* highlighted link used in bot replies */
+        .bot-link {
+            color: #6a3ea1;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background: #fff;
+            width: 60%;
+            max-width: 700px;
+            margin: 120px auto;
+            border-radius: 12px;
+        }
+
+        .modal-header {
+            background: #e4d6ef;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .close-btn {
+            font-size: 26px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 25px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+    </style>
+
+    <script>
+        /* ===== SAMPLE TEXT ===== */
+        const samples = [
+            "The government announced new economic policies to improve employment rates.",
+            "Scientists discovered a renewable energy source.",
+            "A viral post claims drinking salt water cures all diseases."
+        ];
+
+        function pasteSample() {
+            if (!newsText) newsText = document.getElementById('newsText');
+            newsText.value = samples[Math.floor(Math.random() * samples.length)];
+        }
+        function clearText() {
+            if (!newsText) newsText = document.getElementById('newsText');
+            newsText.value = "";
+            document.getElementById("result")?.remove();
+        }
+
+        /* ===== CHATBOT ===== */
+        // lazy DOM node references (elements are parsed after DOMContentLoaded)
+        let chatbox, chatMessages, chatInput, aboutModal, newsText;
+        document.addEventListener('DOMContentLoaded', () => {
+            chatbox = document.getElementById('chatbox');
+            chatMessages = document.getElementById('chatMessages');
+            chatInput = document.getElementById('chatInput');
+            newsText = document.getElementById('newsText');
+            aboutModal = document.getElementById('aboutModal');
+
+            // Send when the user presses Enter (prevent form submit)
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+            });
+        });
+
+        function toggleChat() {
+            if (!chatbox) chatbox = document.getElementById('chatbox');
+            // toggle using a class so the correct flex layout is applied when visible
+            const isOpen = chatbox.classList.toggle('open');
+            if (isOpen) {
+                // when opening, ensure we scroll to the latest messages and focus input
+                if (!chatMessages) chatMessages = document.getElementById('chatMessages');
+                setTimeout(() => {
+                    try {
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                        const last = chatMessages.lastElementChild;
+                        if (last) last.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    } catch (e) { }
+                    chatInput?.focus();
+                }, 20);
+            }
+        }
+
+        const qa = [
+            { keys: ["project"], answer: "This is a News Categorization system that detects Real or Fake news using NLP." },
+            { keys: ["work", "how", "how it works"], answer: "It uses TF-IDF for feature extraction and Logistic Regression for classification." },
+            { keys: ["dataset", "data", "source"], answer: "The dataset consists of True.csv and Fake.csv news articles." },
+            { keys: ["model"], answer: "The model used is Logistic Regression." },
+            { keys: ["accuracy", "accurate"], answer: "The model achieved around 98% accuracy." },
+            { keys: ["use", "how to use"], answer: "Paste news text and click Check News." },
+            { keys: ["fake news", "what is fake news", "what is fake"], answer: "Fake news is misinformation or disinformation presented as legitimate news to mislead readers. <a href='/fake-news' class='bot-link'>Learn more about Fake News</a>.", isHtml: true },
+            { keys: ["verify", "how to verify", "check"], answer: "To verify a claim, cross-check with reputable outlets, look for original sources, and consult fact-checking sites. <a href='/verify' class='bot-link'>Verification Tips</a>.", isHtml: true },
+            { keys: ["improve", "improvements", "better", "enhance"], answer: "Model improvements include larger labeled datasets, more balanced classes, transformer-based models, and human-in-the-loop review. <a href='/research' class='bot-link'>Read research suggestions</a>.", isHtml: true }
+        ];
+
+        function addMsg(text, who, isHtml = false) {
+            if (!chatMessages) chatMessages = document.getElementById('chatMessages');
+            const d = document.createElement("div");
+            d.className = "msg " + who;
+            if (isHtml) d.innerHTML = text; else d.innerText = text;
+            chatMessages.appendChild(d);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // normalize input and match tokens (more robust than just substring checks)
+        function getBotReply(text) {
+            const fallback = { text: "Try asking about the project, model, dataset, or accuracy.", isHtml: false };
+            if (!text) return fallback;
+            const normalized = text.toLowerCase().replace(/[^\w\s]/g, ' ').trim();
+            const tokens = normalized.split(/\s+/);
+            for (let q of qa) {
+                if (q.keys.some(k => tokens.includes(k) || normalized.includes(k))) return { text: q.answer, isHtml: !!q.isHtml };
+            }
+            return fallback;
+        }
+
+        function sendMessage() {
+            const msg = (chatInput?.value || '').trim();
+            if (!msg) return;
+            addMsg(msg, "user");
+            setTimeout(() => {
+                const reply = getBotReply(msg);
+                addMsg(reply.text, "bot", reply.isHtml);
+            }, 300);
+            chatInput.value = "";
+        }
+
+        function quickAsk(q) {
+            addMsg(q, "user");
+            setTimeout(() => {
+                const reply = getBotReply(q);
+                addMsg(reply.text, "bot", reply.isHtml);
+            }, 300);
+        }
+
+        /* ===== ABOUT MODAL ===== */
+        function openAbout() { aboutModal.style.display = "block"; }
+        function closeAbout() { aboutModal.style.display = "none"; }
+        window.onclick = e => { if (e.target === aboutModal) closeAbout(); };
+    </script>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="header-left">News Categorization<span>By Vexana</span></div>
+        <div class="header-right"><a onclick="openAbout()">About Us</a></div>
+    </div>
+
+    <div class="container">
+        <div class="left">
+            <h1>News Categorization</h1>
+            <p>Automatically classify news as <b>Real</b> or <b>Fake</b> using NLP.</p>
+        </div>
+
+        <div class="right">
+            <form method="post">
+                <textarea id="newsText" name="news" required>{{ news_text }}</textarea>
+                <br><br>
+                <button type="button" onclick="pasteSample()">Paste Sample</button>
+                <button type="submit">Check News</button>
+                <button type="button" class="clear-btn" onclick="clearText()">Clear</button>
+            </form>
+
+            {% if prediction %}
+            <div id="result" class="result {% if 'REAL' in prediction %}real{% else %}fake{% endif %}">
+                {{ prediction }}<br>
+                Accuracy: {{ confidence }}%
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <button class="chat-btn" onclick="toggleChat()">💬</button>
+
+    <div class="chatbox" id="chatbox">
+        <div class="chatbox-header">
+            <span>Project Chatbot</span>
+            <button onclick="toggleChat()">✖</button>
+        </div>
+
+        <div class="chatbox-messages" id="chatMessages">
+            <div class="msg bot">Hi! Ask me about the project</div>
+            <div class="quick-questions">
+                <button onclick="quickAsk('How to use?')">How to improve?</button>
+                <button onclick="quickAsk('project')">Project?</button>
+                <button onclick="quickAsk('how it works')">How it works?</button>
+                <button onclick="quickAsk('model')">Model?</button>
+                <button onclick="quickAsk('accuracy')">Accuracy?</button>
+                <button onclick="quickAsk('fake news')">Fake News?</button>
+                <button onclick="quickAsk('verify')">How to verify?</button>
+                <button onclick="quickAsk('improve')">How to improve?</button>
+            </div>
+        </div>
+
+        <div class="chatbox-input">
+            <input id="chatInput" placeholder="Type your question..." />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Information</h2>
+                <span class="close-btn" onclick="closeAbout()">×</span>
+            </div>
+            <div class="modal-body">
+                <p>News Categorization is a web-based application developed using Flask that automatically classifies
+                    news articles as Real or Fake using Natural Language Processing (NLP) and machine learning
+                    techniques. The system preprocesses the input text by cleaning and standardizing it before
+                    converting it into numerical features using the TF-IDF method. A Logistic Regression model then
+                    analyzes these features to predict the authenticity of the news and displays both the classification
+                    result and a confidence score to the user.
+
+                    In addition to the news classification feature, the application includes a rule-based chatbot that
+                    assists users by answering common questions about the project, such as how the system works, the
+                    model used, and the accuracy achieved. The system runs on a local web server and can be accessed
+                    through a web browser, making it suitable for academic demonstration and learning purposes. This
+                    project demonstrates the integration of NLP, machine learning, and web development to create an
+                    interactive and user-friendly fake news detection system.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
