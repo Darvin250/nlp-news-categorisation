@@ -315,14 +315,14 @@
 
         const qa = [
             { keys: ["project"], answer: "This is a News Categorization system that detects Real or Fake news using NLP." },
-            { keys: ["work", "how", "how it works"], answer: "It uses TF-IDF for feature extraction and Logistic Regression for classification." },
+            { keys: ["work", "how it works"], answer: "It uses TF-IDF for feature extraction and Logistic Regression for classification." },
             { keys: ["dataset", "data", "source"], answer: "The dataset consists of True.csv and Fake.csv news articles." },
             { keys: ["model"], answer: "The model used is Logistic Regression." },
             { keys: ["accuracy", "accurate"], answer: "The model achieved around 98% accuracy." },
             { keys: ["use", "how to use"], answer: "Paste news text and click Check News." },
             { keys: ["fake news", "what is fake news", "what is fake"], answer: "Fake news is misinformation or disinformation presented as legitimate news to mislead readers. <a href='/fake-news' class='bot-link'>Learn more about Fake News</a>.", isHtml: true },
-            { keys: ["verify", "how to verify", "check"], answer: "To verify a claim, cross-check with reputable outlets, look for original sources, and consult fact-checking sites. <a href='/verify' class='bot-link'>Verification Tips</a>.", isHtml: true },
-            { keys: ["improve", "improvements", "better", "enhance"], answer: "Model improvements include larger labeled datasets, more balanced classes, transformer-based models, and human-in-the-loop review. <a href='/research' class='bot-link'>Read research suggestions</a>.", isHtml: true }
+            { keys: ["verify", "how to verify", "check"], answer: "To verify a claim, cross-check with reputable outlets, look for original sources, and consult fact-checking sites.", isHtml: true },
+            { keys: ["improve", "how to improve", "improvements", "better", "enhance"], answer: "Model improvements include larger labeled datasets, more balanced classes, transformer-based models, and human-in-the-loop review.", isHtml: true }
         ];
 
         function addMsg(text, who, isHtml = false) {
@@ -414,7 +414,7 @@
         <div class="chatbox-messages" id="chatMessages">
             <div class="msg bot">Hi! Ask me about the project</div>
             <div class="quick-questions">
-                <button onclick="quickAsk('How to use?')">How to improve?</button>
+                <button onclick="quickAsk('How to use?')">How to use?</button>
                 <button onclick="quickAsk('project')">Project?</button>
                 <button onclick="quickAsk('how it works')">How it works?</button>
                 <button onclick="quickAsk('model')">Model?</button>
